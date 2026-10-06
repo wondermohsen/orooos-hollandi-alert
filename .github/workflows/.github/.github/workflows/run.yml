@@ -1,0 +1,57 @@
+name: Divar Alert
+
+on:
+
+  schedule:
+
+    - cron: '*/15 * * * *'   # هر ۱۵ دقیقه یک‌بار
+
+  workflow_dispatch:         # امکان اجرای دستی
+
+jobs:
+
+  run:
+
+    runs-on: ubuntu-latest
+
+    steps:
+
+      - name: Checkout
+
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+
+        uses: actions/setup-python@v5
+
+        with:
+
+          python-version: '3.11'
+
+      - name: Install requests
+
+        run: pip install requests
+
+      - name: Run script
+
+        env:
+
+          TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
+
+          CHAT_ID: ${{ secrets.CHAT_ID }}
+
+        run: python main.py
+
+      - name: Commit seen tokens
+
+        run: |
+
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+
+          git config --local user.name "github-actions[bot]"
+
+          git add seen_tokens.json || true
+
+          git commit -m "Update seen tokens" || true
+
+          git push || true
